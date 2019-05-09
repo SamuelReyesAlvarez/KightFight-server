@@ -1,4 +1,4 @@
-package com.moe;
+package com.kf;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,35 +7,35 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 
-import com.moe.controlador.HiloServidor;
-import com.moe.modelo.Chat;
+import com.kf.controller.ServerThread;
+import com.kf.model.Chat;
 
-public class Inicio {
+public class MainApp {
 
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static void main(String[] args) throws IOException {
 
-		int puerto = 54321;
+		int port = 54321;
 
-		ServerSocket servidor = new ServerSocket(puerto);
+		ServerSocket server = new ServerSocket(port);
 
 		System.out.println(sdf.format(new Timestamp(System.currentTimeMillis())) + " --> Servidor iniciado");
 
-		LinkedList<Socket> listaClientes = new LinkedList<Socket>();
+		LinkedList<Socket> clientList = new LinkedList<Socket>();
 
-		Chat chat = new Chat(listaClientes);
+		Chat chat = new Chat(clientList);
 
 		while (true) {
-			Socket cliente = new Socket();
+			Socket client = new Socket();
 
-			cliente = servidor.accept();
+			client = server.accept();
 
-			chat.addCliente(cliente);
+			chat.addClient(client);
 
-			HiloServidor hilo = new HiloServidor(cliente, chat);
+			ServerThread thread = new ServerThread(client, chat);
 
-			hilo.start();
+			thread.start();
 		}
 	}
 }
