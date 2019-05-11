@@ -5,8 +5,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import com.google.gson.Gson;
 import com.kf.model.Chat;
+import com.kf.model.Login;
 
+/**
+ * 
+ * @author Samuel
+ *
+ */
 public class ServerThread extends Thread {
 
 	DataInputStream dis;
@@ -27,20 +34,27 @@ public class ServerThread extends Thread {
 	public void run() {
 		System.out.println("Clientes conectados: " + chat.getClientList().size());
 
-		updateClientChat(chat.getMessages());
+		updateClientChat();
 
 		while (true) {
 			try {
-				String message = dis.readUTF();
+				String[] message = (dis.readUTF()).split("~");
 
-				if ("*".equals(message.trim())) {
-					System.out.println("Clientes conectados: " + chat.getClientList().size());
+				switch (message[0]) {
+				case "message":
+					if (message[1].trim().length() > 0) {
+						chat.addMessage(message[1].trim());
+						updateClientChat();
+					}
+					break;
+				case "login":
+					Login login = new Login(message[1], message[2], 0);
+
+					break;
+
+				default:
 					break;
 				}
-
-				chat.addMessage(message);
-
-				updateClientChat(chat.getMessages());
 			} catch (IOException e) {
 				System.out.println("Error al recibir mensaje de cliente");
 				break;
@@ -54,13 +68,15 @@ public class ServerThread extends Thread {
 		}
 	}
 
-	private void updateClientChat(String messages) {
+	private void updateClientChat() {
 
 		for (int i = 0; i < chat.getClientList().size(); i++) {
 			if (chat.getClient(i).isConnected()) {
 				try {
 					DataOutputStream dos = new DataOutputStream(chat.getClient(i).getOutputStream());
-					dos.writeUTF(messages);
+					Gson gson = new Gson();
+					String jsonOut = gson.toJson(chat);
+					dos.writeUTF(jsonOut);
 				} catch (IOException e) {
 					System.out.println("Error al crear flujo de salida");
 				}

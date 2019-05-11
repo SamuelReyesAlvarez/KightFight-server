@@ -3,6 +3,11 @@ package com.kf.model;
 import java.net.Socket;
 import java.util.LinkedList;
 
+/**
+ * 
+ * @author Samuel
+ *
+ */
 public class Chat {
 
 	private static final int MAX_MESSAGES_HISTORY = 50;
